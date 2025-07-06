@@ -1,0 +1,74 @@
+
+Difference between JPA, Hibernate, and Spring Data JPA
+
+1. JPA (Java Persistence API)
+- A Java specification (JSR 338) that defines a set of standards for object-relational mapping (ORM).
+- Provides a consistent way to interact with databases in Java.
+- Does NOT provide any implementation—just interfaces and annotations.
+- Examples: @Entity, @Id, EntityManager
+- Think of JPA as the rules or contract for ORM in Java.
+
+2. Hibernate
+- A concrete ORM framework that implements JPA.
+- Can be used with or without JPA.
+- Offers extended features beyond JPA (e.g., caching, interceptors).
+- Uses Session, Transaction APIs when used natively.
+- Hibernate is the tool that actually implements and executes the rules defined by JPA.
+
+3. Spring Data JPA
+- A Spring-based abstraction layer over JPA implementations like Hibernate.
+- Minimizes boilerplate: No need to write queries or DAO classes.
+- Provides smart repository interfaces with methods like findByName(), save(), deleteById().
+- Manages EntityManager and transactions automatically via Spring.
+- Spring Data JPA is a shortcut layer that simplifies JPA and Hibernate usage in Spring apps.
+
+Code Comparison:
+
+Hibernate (Manual)
+------------------
+public Integer addEmployee(Employee employee){
+    Session session = factory.openSession();
+    Transaction tx = null;
+    Integer employeeID = null;
+
+    try {
+        tx = session.beginTransaction();
+        employeeID = (Integer) session.save(employee);
+        tx.commit();
+    } catch (HibernateException e) {
+        if (tx != null) tx.rollback();
+        e.printStackTrace(); 
+    } finally {
+        session.close(); 
+    }
+    return employeeID;
+}
+
+Spring Data JPA (Clean)
+------------------------
+EmployeeRepository.java
+public interface EmployeeRepository extends JpaRepository<Employee, Integer> {}
+
+EmployeeService.java
+@Autowired
+private EmployeeRepository employeeRepository;
+
+@Transactional
+public void addEmployee(Employee employee) {
+    employeeRepository.save(employee);
+}
+
+Summary Table:
+
+| Feature                   | JPA                | Hibernate           | Spring Data JPA               |
+|--------------------------|--------------------|---------------------|-------------------------------|
+| Type                     | Specification      | Implementation      | Abstraction over JPA          |
+| Provides Implementation? | No                 | Yes                 | No                            |
+| Boilerplate Code         | Moderate           | High                | Low                           |
+| EntityManager Handling   | Manual             | Manual              | Automatic by Spring           |
+| Custom Queries           | JPQL               | HQL                 | Method Naming or @Query       |
+| Transactions             | Manual/Declarative | Manual/Declarative  | Declarative (@Transactional)  |
+
+References:
+- https://www.javaworld.com/article/3379043/what-is-jpa-introduction-to-the-java-persistence-api.html
+- https://dzone.com/articles/what-is-the-difference-between-hibernate-and-sprin-1
